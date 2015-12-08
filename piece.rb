@@ -1,11 +1,12 @@
 class Piece
 
   attr_accessor :pos
-  attr_reader :color
+  attr_reader :color, :board
 
-  def initialize(pos, color = nil)
+  def initialize(pos, color, board)
     @pos = pos
     @color = color
+    @board = board
   end
 
   def moves
@@ -18,6 +19,10 @@ class Piece
 
   def in_range?(position)
     position.none? { |x| x > 7 || x < 0 }
+  end
+
+  def move_into_check?(pos)
+    
   end
 end
 
@@ -42,13 +47,6 @@ class SlidingPiece < Piece
     [0, -1],
     [-1, 0]
   ]
-
-  attr_accessor :board
-
-  def initialize(pos, color, board)
-    super(pos, color)
-    @board = board
-  end
 
   def moves
     moves = []
@@ -110,12 +108,6 @@ end
 
 
 class SteppingPiece < Piece
-  attr_reader :board
-
-  def initialize(pos, color, board)
-    super(pos, color)
-    @board = board
-  end
 
   def moves
     moves = []
@@ -170,13 +162,7 @@ class King < SteppingPiece
 end
 
 class Pawn < Piece
-  attr_reader :board
   SYMBOLS = { white: "\u2659", black: "\u265F" }
-
-  def initialize(pos, color, board)
-    super(pos, color)
-    @board = board
-  end
 
   def moves
     moves = []

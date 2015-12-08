@@ -35,9 +35,9 @@ class Board
           elsif idx == 2 || idx == 5
             Bishop.new([irow, idx], color, self)
           elsif idx == 3
-            King.new([irow, idx], color, self)
-          elsif idx == 4
             Queen.new([irow, idx], color, self)
+          elsif idx == 4
+            King.new([irow, idx], color, self)
           end
         end
 
@@ -48,7 +48,7 @@ class Board
         row.map!.with_index { |_, idx| Pawn.new([irow, idx], :black, self) }
 
       else
-        row.map!.with_index { |_, idx| EmptyPiece.new([irow, idx]) }
+        row.map!.with_index { |_, idx| EmptyPiece.new([irow, idx], nil, self) }
       end
 
     end
@@ -70,9 +70,31 @@ class Board
     end
   end
 
+
   def valid_move?(start_pos, end_pos)
     return false if self[start_pos].is_a?(EmptyPiece)
     self[start_pos].moves.include?(end_pos)
+  end
+
+  def in_check?(color)
+    grid.any? do |row|
+      row.any? do |tile|
+        tile.color != color && tile.moves.include?(find_king(color))
+      end
+    end
+  end
+
+  def find_king(color)
+    king_position = []
+
+    self.grid.each_with_index do |row, irow|
+      king_y = row.index { |tile| tile.is_a?(King) && tile.color == color }
+      next if king_y.nil?
+      king_position.concat([irow, king_y])
+      break
+    end
+
+    king_position
   end
 
 end
