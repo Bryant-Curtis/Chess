@@ -21,26 +21,52 @@ class Board
   end
 
   def setup
-    @grid.map.with_index do |_, irow|
-      if irow < 2 || irow > 5
-        @grid[irow].map!.with_index { |_, idx| Piece.new([irow, idx]) }
-        @grid[-(irow + 1)].map!.with_index { |_, idx| Piece.new([@grid.size-irow-1, idx]) }
+
+    @grid.map!.with_index do |row, irow|
+      if irow == 0 || irow == 7
+        color = :white if irow == 0
+        color = :black if irow == 7
+
+        row.map!.with_index do |tile, idx|
+          if idx == 0 || idx == 7
+            Rook.new([irow, idx], color, self)
+          elsif idx == 1 || idx == 6
+            Knight.new([irow, idx], color, self)
+          elsif idx == 2 || idx == 5
+            Bishop.new([irow, idx], color, self)
+          elsif idx == 3
+            King.new([irow, idx], color, self)
+          elsif idx == 4
+            Queen.new([irow, idx], color, self)
+          end
+        end
+
+      elsif irow == 1
+      row.map!.with_index { |_, idx| Pawn.new([irow, idx], :white, self) }
+
+      elsif irow == 6
+        row.map!.with_index { |_, idx| Pawn.new([irow, idx], :black, self) }
+
       else
-        @grid[irow].map!.with_index { |_, idx| EmptyPiece.new([irow, idx]) }
+        row.map!.with_index { |_, idx| EmptyPiece.new([irow, idx]) }
       end
+
     end
   end
 
   def move(start_pos, end_pos)
+
     return false unless self[start_pos].moves.include?(end_pos)
     self[start_pos].pos = end_pos
 
-    if self[end_pos].color.nil?
+    if self[end_pos].is_a?(EmptyPiece)
       self[end_pos].pos = start_pos
       self[end_pos], self[start_pos] = self[start_pos], self[end_pos]
     else
       self[end_pos] = self[start_pos]
+
       self[start_pos] = EmptyPiece.new(start_pos)
+
     end
   end
 

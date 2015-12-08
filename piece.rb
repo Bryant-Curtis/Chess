@@ -3,7 +3,7 @@ class Piece
   attr_accessor :pos
   attr_reader :color
 
-  def initialize(pos, color=nil)
+  def initialize(pos, color = nil)
     @pos = pos
     @color = color
   end
@@ -11,10 +11,18 @@ class Piece
   def moves
     self.moves
   end
+
+  def to_s
+    self.class::SYMBOLS[self.color]
+  end
+
+  def in_range?(position)
+    position.none? { |x| x > 7 || x < 0 }
+  end
 end
 
 class EmptyPiece < Piece
-
+  SYMBOLS = Hash.new { "_" }
   def moves
     []
   end
@@ -35,7 +43,7 @@ class SlidingPiece < Piece
     [-1, 0]
   ]
 
-  attr_reader :board
+  attr_accessor :board
 
   def initialize(pos, color, board)
     super(pos, color)
@@ -44,27 +52,34 @@ class SlidingPiece < Piece
 
   def moves
     moves = []
+
     self.move_dirs.each do |delta|
       current_x, current_y = pos
       new_pos = [delta[0] + current_x, delta[1] + current_y]
-      while board[new_pos].is_a?(EmptyPiece)
-        break if new_pos.any? { |x| x > 7 || x < 0 }
-        moves << new_pos
-        current_x, current_y = new_pos
-        new_pos = [delta[0] + current_x, delta[1] + current_y]
+      # next unless in_range?(new_pos)
+
+      while in_range?(new_pos) && board[new_pos].is_a?(EmptyPiece)
+        # break if new_pos.any? { |x| x > 7 || x < 0 }
+         moves << new_pos
+         current_x, current_y = new_pos
+         new_pos = [delta[0] + current_x, delta[1] + current_y]
       end
-      unless board[new_pos].nil?
+
+      if in_range?(new_pos)
         moves << new_pos unless board[new_pos].color == self.color
       end
     end
-    moves
+
+   moves
   end
+
 
 
 
 end
 
 class Bishop < SlidingPiece
+  SYMBOLS = { white: "\u2657", black: "\u265D" }
 
   def move_dirs
     DIAG_DELTAS
@@ -73,6 +88,7 @@ class Bishop < SlidingPiece
   end
 
 class Rook < SlidingPiece
+  SYMBOLS = { white: "\u2656", black: "\u265C" }
 
     def move_dirs
       STRAIGHT_DELTAS
@@ -81,6 +97,8 @@ class Rook < SlidingPiece
 end
 
 class Queen < SlidingPiece
+  SYMBOLS = { white: "\u2655", black: "\u265B" }
+
 
   def move_dirs
     STRAIGHT_DELTAS + DIAG_DELTAS
@@ -104,9 +122,9 @@ class SteppingPiece < Piece
     self.move_dirs.each do |delta|
       current_x, current_y = pos
       new_pos = [delta[0] + current_x, delta[1] + current_y]
-      next if board[new_pos].color == self.color
-      next if new_pos.any? { |x| x > 7 || x < 0 }
-      moves << new_pos
+      next unless in_range?(new_pos)
+
+      moves << new_pos unless board[new_pos].color == self.color
     end
 
     moves
@@ -114,6 +132,8 @@ class SteppingPiece < Piece
 end
 
 class Knight < SteppingPiece
+  SYMBOLS = { white: "\u2658", black: "\u265E" }
+
   KNIGHT_DELTAS = [
    [1, 2],
    [1, -2],
@@ -131,6 +151,8 @@ class Knight < SteppingPiece
 end
 
 class King < SteppingPiece
+  SYMBOLS = { white: "\u2654", black: "\u265A" }
+
   KING_DELTAS = [
     [1, 0],
     [1, -1],
@@ -148,6 +170,8 @@ class King < SteppingPiece
 end
 
 class Pawn < Piece
+  attr_reader :board
+  SYMBOLS = { white: "\u2659", black: "\u265F" }
 
   def initialize(pos, color, board)
     super(pos, color)
@@ -157,12 +181,18 @@ class Pawn < Piece
   def moves
     moves = []
     row, column = pos
-    new_pos = [row + 1, column]
-    moves << new_pos if board[new_pos].is_a?(EmptyPiece)
-    row, column = new_pos
-    [1, -1].each do |diag|
-      moves << [row, column + diag] unless board[row, column + diag].color == self.color
+
+    new_row = self.color == :white ? row + 1 : row - 1
+    new_pos = [new_row, column]
+    moves << new_pos if in_range?(new_pos) &&
+    board[new_pos].is_a?(EmptyPiece)
+
+    [[new_row, column + 1], [new_row, column - 1]].each do |delta|
+      next if !in_range?(delta) || board[delta].is_a?(EmptyPiece)
+      moves << delta unless board[delta].color == self.color
     end
+
+    moves
   end
 
 

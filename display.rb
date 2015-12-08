@@ -21,8 +21,7 @@ class Display
       move = move_cursor
       render
     end
-    move = make_move unless board.valid_move?(*move)
-
+    return make_move unless board.valid_move?(*move)
     board.move(*move)
   end
 
@@ -37,7 +36,7 @@ private
     puts "\e[H\e[2J"
     rendered = board.grid.map.with_index do |rank, idx1|
       rank.map.with_index do |tile, idx2|
-        tile = tile.is_a?(Piece) ? '*' : '_'
+        tile = tile.to_s
 
         if [idx1, idx2] == cursor
           tile = tile.colorize(:blue)
