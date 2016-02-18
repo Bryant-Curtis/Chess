@@ -9,15 +9,14 @@ class Board
     setup
   end
 
-
   def [](pos)
-    rank, file = pos
-    @grid[rank][file]
+    row, tile = pos
+    @grid[row][tile]
   end
 
   def []=(pos, value)
-    rank, file = pos
-    @grid[rank][file] = value
+    row, tile = pos
+    @grid[row][tile] = value
   end
 
   def setup
@@ -27,17 +26,17 @@ class Board
         color = :white if irow == 0
         color = :black if irow == 7
 
-        row.map!.with_index do |tile, idx|
-          if idx == 0 || idx == 7
-            Rook.new([irow, idx], color, self)
-          elsif idx == 1 || idx == 6
-            Knight.new([irow, idx], color, self)
-          elsif idx == 2 || idx == 5
-            Bishop.new([irow, idx], color, self)
-          elsif idx == 3
-            Queen.new([irow, idx], color, self)
-          elsif idx == 4
-            King.new([irow, idx], color, self)
+        row.map!.with_index do |tile, itile|
+          if itile == 0 || itile == 7
+            Rook.new([irow, itile], color, self)
+          elsif itile == 1 || itile == 6
+            Knight.new([irow, itile], color, self)
+          elsif itile == 2 || itile == 5
+            Bishop.new([irow, itile], color, self)
+          elsif itile == 3
+            Queen.new([irow, itile], color, self)
+          elsif itile == 4
+            King.new([irow, itile], color, self)
           end
         end
 
